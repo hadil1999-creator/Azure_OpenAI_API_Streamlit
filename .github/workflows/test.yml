@@ -20,10 +20,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        cd Azure_OpenAI_API_Streamlit
         pip install -r requirements.txt
 
     - name: Test imports
       run: |
-        cd Azure_OpenAI_API_Streamlit
         python -c "import streamlit; import pandas; import main_app; print('All imports successful')"
