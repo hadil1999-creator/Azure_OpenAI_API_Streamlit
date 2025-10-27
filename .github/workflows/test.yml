@@ -10,6 +10,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
     - uses: actions/checkout@v4
 
@@ -21,7 +35,20 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
+        sudo apt-get install -y mysql-client
+
+    - name: Wait for MySQL to be ready
+      run: |
+        until mysqladmin ping -h "127.0.0.1" -proot --silent; do
+          echo "Waiting for database connection..."
+          sleep 5
+        done
 
     - name: Test imports
+      env:
+        DB_HOST: 127.0.0.1
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_NAME: testdb
       run: |
         python -c "import streamlit; import pandas; import main_app; print('All imports successful')"
